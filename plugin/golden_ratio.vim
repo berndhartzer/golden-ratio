@@ -21,6 +21,10 @@ if !exists('g:golden_ratio_exclude_nonmodifiable')
   let g:golden_ratio_exclude_nonmodifiable = 0
 endif
 
+if !exists('g:golden_ratio_resize_horizontal')
+  let g:golden_ratio_resize_horizontal = 1
+endif
+
 function! s:golden_ratio_width()
   return &columns / 1.618
 endfunction
@@ -60,14 +64,16 @@ function! s:resize_ignored_window(windows, ignored_width, ignored_height)
     exec printf("vertical resize %f", l:width_size)
   endif
 
-  if len(a:windows.height) > 0 && index(a:windows.height, winnr()) >= 0
-    let l:current_height = winheight(winnr())
-    " This is when you are having a vertical setup
-    if &lines - l:current_height < a:ignored_height
-      exec "resize"
-    else
-      let l:height_size = a:ignored_height / len(a:windows.height)
-      exec printf("resize %f", l:height_size)
+  if g:golden_ratio_resize_horizontal
+    if len(a:windows.height) > 0 && index(a:windows.height, winnr()) >= 0
+      let l:current_height = winheight(winnr())
+      " This is when you are having a vertical setup
+      if &lines - l:current_height < a:ignored_height
+        exec "resize"
+      else
+        let l:height_size = a:ignored_height / len(a:windows.height)
+        exec printf("resize %f", l:height_size)
+      endif
     endif
   endif
 
@@ -110,7 +116,9 @@ function! s:resize_main_window(window,
   let l:width  = printf("vertical resize %f", a:main_width)
 
   exec l:width
-  exec l:height
+  if g:golden_ratio_resize_horizontal
+    exec l:height
+  endif
 endfunction
 
 function! s:resize_to_golden_ratio()
